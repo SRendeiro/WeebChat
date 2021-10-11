@@ -2,7 +2,7 @@ const sqlite = require("sqlite3").verbose();
 const dbDirname = "./server/Database/user.db";
 
 module.exports = {
-  openDB: function () {
+  createDB: function () {
     let db = new sqlite.Database(
       dbDirname,
       sqlite.OPEN_READWRITE | sqlite.OPEN_CREATE,
@@ -35,7 +35,7 @@ module.exports = {
     // close the database connection
     db.close();
   },
-  searchUser: function (authKey) {
+  searchUser: function (authKey, callback) {
     let db = new sqlite.Database(dbDirname);
     let sql = `SELECT username FROM users WHERE authKey  = ?;`
 
@@ -44,9 +44,7 @@ module.exports = {
         return console.error(err.message);
       }
       db.close();
-      return row
-        ? console.log(row.username)
-        : console.log(`No playlist found with the id ${playlistId}`);
+      return callback(row)
     
     });
 

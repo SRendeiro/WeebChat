@@ -1,3 +1,10 @@
+/* --------------------------------------------------
+Author: Samuel Pinto Rendeiro
+Created: 01.10.2021 
+Version: 0.1
+---------------------------------------------------*/
+
+//Dependecies required for the Chat
 const express = require("express");
 const app = express();
 const http = require("http");
@@ -8,16 +15,20 @@ const crypto = require("crypto");
 const fs = require("fs");
 const cookieParser = require("cookie-parser");
 const sqlite = require("sqlite3").verbose();
+const cookieModule = require("cookie");
+//External JS file for database queries
 const dbJS = require("./db.js");
 
-dbJS.openDB();
+//* Required here, this will check if DB exist, or create it if necessary
+dbJS.createDB();
 
+// ! Either absolutely useless, or might break everything if removed
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(cookieParser());
 
+//Will be called on user signup
 app.post("/", function (req, res) {
-  let user_token = req.cookies["userKey"]; // always empty
   crypto.randomBytes(24, function (err, buffer) {
     var id = crypto.randomBytes(20).toString("hex");
     dbJS.addUser(req.body.user.username, req.body.user.pwd, id);
@@ -28,10 +39,12 @@ app.post("/", function (req, res) {
       secure: true,
     });
     res.append("Set-Cookie", "userKey=" + id + ";");
+    //After creating the cookie, will redirect to the main chat
     res.redirect("/chat");
   });
 });
 
+//Main page, will either redirect to signup or chat depeding on cookie existing
 app.get("/", (req, res) => {
   let user_token = req.cookies["userKey"];
   if (user_token) {
@@ -41,6 +54,7 @@ app.get("/", (req, res) => {
   }
 });
 
+//Chat page, will check cookie and redirect if necessary to signup
 app.get("/chat", (req, res) => {
   let user_token = req.cookies["userKey"]; // always empty
   if (user_token) {
@@ -50,29 +64,25 @@ app.get("/chat", (req, res) => {
   }
 });
 
+//Using socket.io, handling user interaction is fairly easy.
 io.on("connection", (socket) => {
-  let cookies = socket.request.headers.cookie;
-  console.log(cookies);
-  /* let usernameFound = dbJS.searchUser(); */
-  io.emit("chat message", "User connected");
-
+  let cookies = cookieModule.parse(socket.request.headers.cookie); //* cookie usage is a little different but logic stays the same
+  dbJS.searchUser(cookies.userKey, function (response) {
+    io.emit("chat message", response.username + " connected");
+  });
   socket.on("disconnect", () => {
-    io.emit("chat message", "User disconnected");
+    dbJS.searchUser(cookies.userKey, function (response) {
+      io.emit("chat message", response.username + " disconnected");
+    });
   });
 
   socket.on("chat message", (msg) => {
-    /* let user_token = req.cookies["userKey"];
-    console.log(user_token); */
-    sqlite.io.emit("chat message", msg);
+    dbJS.searchUser(cookies.userKey, function (response) {
+      io.emit("chat message", response.username +": "+msg);
+    });
   });
 });
 
 server.listen(3000, () => {
   console.log("listening on *:3000");
 });
-
-/*
-var tools = require('./tools');
-console.log(typeof tools.foo); // => 'function'
-console.log(typeof tools.bar); // => 'function'
-console.log(typeof tools.zemba); // => undefined*/

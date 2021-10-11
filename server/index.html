@@ -62,6 +62,7 @@
     </form>
     <script src="/socket.io/socket.io.js"></script>
     <script>
+      //Required to link to sokcet.io on server.js
       var socket = io();
 
       var form = document.getElementById("form");
@@ -70,11 +71,13 @@
       form.addEventListener("submit", function (e) {
         e.preventDefault();
         if (input.value) {
+          //Will emit to server, with an "ID" and the value
           socket.emit("chat message", input.value);
           input.value = "";
         }
       });
 
+      //Will get the emited value from the form and display it in the chat
       socket.on("chat message", function (msg) {
         var item = document.createElement("li");
         item.textContent = msg;
