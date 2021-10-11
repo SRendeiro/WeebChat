@@ -19,7 +19,7 @@ const cookieModule = require("cookie");
 //External JS file for database queries
 const dbJS = require("./db.js");
 
-//* Required here, this will check if DB exist, or create it if necessary
+// * Required here, this will check if DB exist, or create it if necessary
 dbJS.createDB();
 
 // ! Either absolutely useless, or might break everything if removed
@@ -33,12 +33,18 @@ app.post("/", function (req, res) {
     var id = crypto.randomBytes(20).toString("hex");
     dbJS.addUser(req.body.user.username, req.body.user.pwd, id);
     res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-    res.cookie("userKey", id, {
+    res.cookie("userKey", id, { 
       maxAge: 9000000000,
       httpOnly: true,
       secure: true,
     });
     res.append("Set-Cookie", "userKey=" + id + ";");
+    res.cookie("loggedIn", true, { 
+      maxAge: 9000000000,
+      httpOnly: true,
+      secure: true,
+    });
+    res.append("Set-Cookie", "loggedIn=" + true + ";");
     //After creating the cookie, will redirect to the main chat
     res.redirect("/chat");
   });
