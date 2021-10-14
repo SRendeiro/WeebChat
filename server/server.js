@@ -9,12 +9,17 @@ const express = require("express");
 const app = express();
 const http = require("http");
 const server = http.createServer(app);
-const { Server } = require("socket.io");
-const io = new Server(server);
+const io = require("socket.io")(server, {
+  cors: {
+    origin: "limitolimito",
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+/* const io = new Server(server); */
 const crypto = require("crypto");
 const fs = require("fs");
 const cookieParser = require("cookie-parser");
-const sqlite = require("sqlite3").verbose();
 const cookieModule = require("cookie");
 //External JS file for database queries
 const dbJS = require("./db.js");
@@ -33,14 +38,12 @@ app.post("/", function (req, res) {
     var id = crypto.randomBytes(20).toString("hex");
     dbJS.addUser(req.body.user.username, req.body.user.pwd, id);
     res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-    res.cookie("userKey", id, { 
-      maxAge: 9000000000,
+    res.cookie("userKey", id, {
       httpOnly: true,
       secure: true,
     });
     res.append("Set-Cookie", "userKey=" + id + ";");
-    res.cookie("loggedIn", true, { 
-      maxAge: 9000000000,
+    res.cookie("loggedIn", true, {
       httpOnly: true,
       secure: true,
     });
@@ -63,6 +66,7 @@ app.get("/", (req, res) => {
 //Chat page, will check cookie and redirect if necessary to signup
 app.get("/chat", (req, res) => {
   let user_token = req.cookies["userKey"]; // always empty
+  console.log(user_token.maxAge);
   if (user_token) {
     res.sendFile(__dirname + "/index.html");
   } else {
@@ -72,6 +76,7 @@ app.get("/chat", (req, res) => {
 
 //Using socket.io, handling user interaction is fairly easy.
 io.on("connection", (socket) => {
+  console.log("this");
   let cookies = cookieModule.parse(socket.request.headers.cookie); //* cookie usage is a little different but logic stays the same
   dbJS.searchUser(cookies.userKey, function (response) {
     io.emit("chat message", response.username + " connected");
@@ -84,7 +89,7 @@ io.on("connection", (socket) => {
 
   socket.on("chat message", (msg) => {
     dbJS.searchUser(cookies.userKey, function (response) {
-      io.emit("chat message", response.username +": "+msg);
+      io.emit("chat message", response.username + ": " + msg);
     });
   });
 });

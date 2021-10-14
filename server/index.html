@@ -55,10 +55,11 @@
       ::-webkit-scrollbar-track {
         background: #f1f1f1;
       }
-
+      
       .h-scrollbar {
-        overflow-x: scroll;
-        width: 300px;
+        overflow-wrap: break-word;
+        overflow-y:auto;
+        
       }
     </style>
   </head>
@@ -96,6 +97,7 @@
         item.textContent = msg;
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
+        item.scrollIntoView();
       });
     </script>
   </body>
