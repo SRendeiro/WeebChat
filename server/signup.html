@@ -14,14 +14,7 @@
     />
   </head>
   <body>
-    <!-- <div>
-    <form method="POST" action="/">
-      <input type="text" name="user[username]">
-      <input type="text" name="user[pwd]">
-      <button type="submit">this</button>
-   </form>
-  </div> -->
-    <form method="POST" action="/">
+    <form method="POST" action="/" class="needs-validation" novalidate>
       <div
         class="modal modal-signin d-block bg-secondary py-5"
         tabindex="-1"
@@ -43,8 +36,15 @@
                     class="form-control rounded-4"
                     id="floatingInput"
                     placeholder="PastaFinder"
+                    minlength="3"
+                    maxlength="15"
+                    required
                   />
                   <label for="floatingInput">Username</label>
+                  <div class="valid-feedback">Username Available!</div>
+                  <div class="invalid-feedback">
+                    Please provide an username within the 3 to 15 characters limit.
+                  </div>
                 </div>
                 <div class="form-floating mb-3">
                   <input
@@ -53,8 +53,14 @@
                     class="form-control rounded-4"
                     id="floatingPassword"
                     placeholder="Password"
+                    minlength="8"
+                    required
                   />
                   <label for="floatingPassword">Password</label>
+                  <div class="valid-feedback">Password is valid!</div>
+                  <div class="invalid-feedback">
+                    Please provide a password containing at least 10 characters.
+                  </div>
                 </div>
                 <button
                   class="w-100 mb-2 btn btn-lg rounded-4 btn-primary"
@@ -77,5 +83,34 @@
       integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ"
       crossorigin="anonymous"
     ></script>
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      (function () {
+        "use strict";
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll(".needs-validation");
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms).forEach(function (form) {
+          form.addEventListener(
+            "submit",
+            function (event) {
+              if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+
+              form.classList.add("was-validated");
+            },
+            false
+          );
+        });
+      })();
+    </script>
   </body>
 </html>

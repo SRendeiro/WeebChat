@@ -11,7 +11,6 @@ const http = require("http");
 const server = http.createServer(app);
 const io = require("socket.io")(server, {
   cors: {
-    origin: "limitolimito",
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -66,7 +65,6 @@ app.get("/", (req, res) => {
 //Chat page, will check cookie and redirect if necessary to signup
 app.get("/chat", (req, res) => {
   let user_token = req.cookies["userKey"]; // always empty
-  console.log(user_token.maxAge);
   if (user_token) {
     res.sendFile(__dirname + "/index.html");
   } else {
@@ -76,7 +74,6 @@ app.get("/chat", (req, res) => {
 
 //Using socket.io, handling user interaction is fairly easy.
 io.on("connection", (socket) => {
-  console.log("this");
   let cookies = cookieModule.parse(socket.request.headers.cookie); //* cookie usage is a little different but logic stays the same
   dbJS.searchUser(cookies.userKey, function (response) {
     io.emit("chat message", response.username + " connected");

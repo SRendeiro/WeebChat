@@ -55,11 +55,10 @@
       ::-webkit-scrollbar-track {
         background: #f1f1f1;
       }
-      
+
       .h-scrollbar {
         overflow-wrap: break-word;
-        overflow-y:auto;
-        
+        overflow-y: auto;
       }
     </style>
   </head>
@@ -84,10 +83,13 @@
 
       form.addEventListener("submit", function (e) {
         e.preventDefault();
-        if (input.value) {
+        if (input.value && input.value.length < 320) {
           //Will emit to server, with an "ID" and the value
-          socket.emit("chat message", input.value);
-          input.value = "";
+          input.classList.remove("is-invalid")
+            socket.emit("chat message", input.value);
+            input.value = "";
+        } else {
+          input.classList.add("is-invalid");
         }
       });
 
